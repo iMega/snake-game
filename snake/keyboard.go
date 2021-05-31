@@ -11,9 +11,9 @@ const (
 	END
 )
 
-type keyboardEvent struct {
-	eventType keyboardEventType
-	key       termbox.Key
+type KeyboardEvent struct {
+	EventType keyboardEventType
+	Key       termbox.Key
 }
 
 func keyToDirection(k termbox.Key) direction {
@@ -31,7 +31,7 @@ func keyToDirection(k termbox.Key) direction {
 	}
 }
 
-func listenToKeyboard(evChan chan keyboardEvent) {
+func listenToKeyboard(evChan chan KeyboardEvent) {
 	termbox.SetInputMode(termbox.InputEsc)
 
 	for {
@@ -39,18 +39,18 @@ func listenToKeyboard(evChan chan keyboardEvent) {
 		case termbox.EventKey:
 			switch ev.Key {
 			case termbox.KeyArrowLeft:
-				evChan <- keyboardEvent{eventType: MOVE, key: ev.Key}
+				evChan <- KeyboardEvent{EventType: MOVE, Key: ev.Key}
 			case termbox.KeyArrowDown:
-				evChan <- keyboardEvent{eventType: MOVE, key: ev.Key}
+				evChan <- KeyboardEvent{EventType: MOVE, Key: ev.Key}
 			case termbox.KeyArrowRight:
-				evChan <- keyboardEvent{eventType: MOVE, key: ev.Key}
+				evChan <- KeyboardEvent{EventType: MOVE, Key: ev.Key}
 			case termbox.KeyArrowUp:
-				evChan <- keyboardEvent{eventType: MOVE, key: ev.Key}
+				evChan <- KeyboardEvent{EventType: MOVE, Key: ev.Key}
 			case termbox.KeyEsc:
-				evChan <- keyboardEvent{eventType: END, key: ev.Key}
+				evChan <- KeyboardEvent{EventType: END, Key: ev.Key}
 			default:
 				if ev.Ch == 'r' {
-					evChan <- keyboardEvent{eventType: RETRY, key: ev.Key}
+					evChan <- KeyboardEvent{EventType: RETRY, Key: ev.Key}
 				}
 			}
 		case termbox.EventError:

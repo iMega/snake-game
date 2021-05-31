@@ -25,7 +25,7 @@ func (g *Game) render() error {
 		bottom = midY + (g.arena.height / 2) + 1
 	)
 
-	renderTitle(left, top)
+	renderTitle(left, top, g.arena)
 	renderArena(g.arena, top, bottom, left)
 	renderSnake(left, bottom, g.arena.snake)
 	renderFood(left, bottom, g.arena.food)
@@ -70,8 +70,15 @@ func renderQuitMessage(right, bottom int) {
 	tbprint(right-17, bottom+1, defaultColor, defaultColor, m)
 }
 
-func renderTitle(left, top int) {
-	tbprint(left, top-1, defaultColor, defaultColor, "Snake Game")
+func renderTitle(left, top int, a *arena) {
+	msg := fmt.Sprintf(
+		"Snake Game head(%d,%d) food(%d,%d)",
+		a.snake.head().x,
+		a.snake.head().y,
+		a.food.x,
+		a.food.y,
+	)
+	tbprint(left, top-1, defaultColor, defaultColor, msg)
 }
 
 func fill(x, y, w, h int, cell termbox.Cell) {
