@@ -497,7 +497,7 @@ func loadBrain(p state.Parameters) (Result, error) {
 		return Result{}, fmt.Errorf("failed to parse filename. Need format <prefix>brain-<score>.json")
 	}
 
-	score := nameWithScore[pos:]
+	score := nameWithScore[pos+1:]
 
 	b, err := ioutil.ReadFile(p.BrainFilename)
 	if err != nil {
