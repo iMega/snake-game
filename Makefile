@@ -1,13 +1,13 @@
-default: test
+REPO = github.com/imega/snake-game
+CWD = /go/src/$(REPO)
+GO_IMG = golang:1.15.8-alpine3.13
 
-build:
-	go build -v -o ./_bin/snake-game
+test: lint unit
 
-run: build
-	./_bin/snake-game
+lint:
+	@-docker run --rm -t -v $(CURDIR):$(CWD) -w $(CWD) \
+		golangci/golangci-lint golangci-lint run
 
-run_on_docker:
-	docker build -t snake-game . && docker run --rm -ti snake-game
-
-test:
-	go test -v ./...
+unit:
+	@docker run --rm -w $(CWD) -v $(CURDIR):$(CWD) \
+		$(GO_IMG) sh -c "go list ./... | xargs go test -vet=off"

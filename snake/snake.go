@@ -16,6 +16,7 @@ type snake struct {
 	body      []coord
 	direction direction
 	length    int
+	steps     int
 }
 
 func newSnake(d direction, b []coord) *snake {

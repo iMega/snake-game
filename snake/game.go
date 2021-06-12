@@ -1,6 +1,7 @@
 package snake
 
 import (
+	"os"
 	"time"
 
 	"github.com/imega/snake-game/state"
@@ -21,10 +22,10 @@ type Game struct {
 
 func initialSnake() *snake {
 	return newSnake(RIGHT, []coord{
-		coord{x: 1, y: 1},
-		coord{x: 1, y: 2},
-		coord{x: 1, y: 3},
-		coord{x: 1, y: 4},
+		{x: 1, y: 1},
+		{x: 1, y: 2},
+		{x: 1, y: 3},
+		{x: 1, y: 4},
 	})
 }
 
@@ -40,8 +41,8 @@ func (g *Game) end() {
 	g.isOver = true
 }
 
-func (g *Game) moveInterval() time.Duration {
-	ms := 1000 - (g.score / 10)
+func (g *Game) moveInterval(speed int) time.Duration {
+	ms := 1*speed - (g.score / 10)
 	return time.Duration(ms) * time.Millisecond
 }
 
@@ -61,7 +62,8 @@ func NewGame() *Game {
 }
 
 // Start starts the game
-func (g *Game) Start(ch chan state.SnakeGame) {
+func (g *Game) Start(p state.Parameters, ch chan state.SnakeGame, statCh chan state.Stat) {
+	speed := p.Speed
 	if err := termbox.Init(); err != nil {
 		panic(err)
 	}
@@ -69,25 +71,44 @@ func (g *Game) Start(ch chan state.SnakeGame) {
 
 	go listenToKeyboard(KeyboardEventsChan)
 
-	if err := g.render(); err != nil {
+	stat := state.Stat{}
+
+	if err := g.render(p, stat); err != nil {
 		panic(err)
 	}
 
-mainloop:
-	for {
-		select {
-		case p := <-pointsChan:
-			g.addPoints(p)
-		case e := <-KeyboardEventsChan:
+	go func() {
+		for s := range statCh {
+			stat = s
+		}
+	}()
+
+	go func() {
+		for e := range KeyboardEventsChan {
 			switch e.EventType {
 			case MOVE:
 				d := keyToDirection(e.Key)
 				g.arena.snake.changeDirection(d)
 			case RETRY:
 				g.retry()
+			case SPEED:
+				if e.Key == termbox.KeySpace {
+					speed += 10
+				}
+				if e.Key == termbox.KeyBackspace {
+					speed -= 10
+				}
 			case END:
-				break mainloop
+				termbox.Close()
+				os.Exit(0)
 			}
+		}
+	}()
+
+	for {
+		select {
+		case p := <-pointsChan:
+			g.addPoints(p)
 		default:
 			if !g.isOver {
 				if err := g.arena.moveSnake(); err != nil {
@@ -103,31 +124,36 @@ mainloop:
 				})
 			}
 
-			ch <- state.SnakeGame{
-				Score:  g.score,
-				IsOver: g.isOver,
-				Arena: state.Arena{
-					Width:  g.arena.width,
-					Height: g.arena.height,
-				},
-				Food: state.Coord{
-					X: g.arena.food.x,
-					Y: g.arena.food.y,
-				},
-				Snake: state.Snake{
-					Head: state.Coord{
-						X: g.arena.snake.head().x,
-						Y: g.arena.snake.head().y,
-					},
-					Body: body,
-				},
-			}
-
-			if err := g.render(); err != nil {
+			if err := g.render(p, stat); err != nil {
 				panic(err)
 			}
 
-			time.Sleep(g.moveInterval())
+			if !p.Human {
+				ch <- state.SnakeGame{
+					Score:  g.score,
+					IsOver: g.isOver,
+					Arena: state.Arena{
+						Width:  g.arena.width,
+						Height: g.arena.height,
+					},
+					Food: state.Coord{
+						X: g.arena.food.x,
+						Y: g.arena.food.y,
+					},
+					Snake: state.Snake{
+						Head: state.Coord{
+							X: g.arena.snake.head().x,
+							Y: g.arena.snake.head().y,
+						},
+						Body:  body,
+						Steps: g.arena.snake.steps,
+					},
+				}
+			}
+
+			if speed > 0 {
+				time.Sleep(g.moveInterval(speed))
+			}
 		}
 	}
 }

@@ -9,6 +9,7 @@ const (
 	MOVE keyboardEventType = 1 + iota
 	RETRY
 	END
+	SPEED
 )
 
 type KeyboardEvent struct {

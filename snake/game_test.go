@@ -18,7 +18,7 @@ func TestGameMoveInterval(t *testing.T) {
 	g := NewGame()
 	g.score = 150
 
-	if d := g.moveInterval(); d != e {
+	if d := g.moveInterval(100); d != e {
 		t.Fatalf("Expected move interval to be %d but got %d", e, d)
 	}
 }

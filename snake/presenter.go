@@ -3,6 +3,7 @@ package snake
 import (
 	"fmt"
 
+	"github.com/imega/snake-game/state"
 	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )
@@ -13,7 +14,11 @@ const (
 	snakeColor   = termbox.ColorGreen
 )
 
-func (g *Game) render() error {
+func (g *Game) render(p state.Parameters, stat state.Stat) error {
+	if p.Silent {
+		return nil
+	}
+
 	termbox.Clear(defaultColor, defaultColor)
 
 	var (
@@ -25,7 +30,7 @@ func (g *Game) render() error {
 		bottom = midY + (g.arena.height / 2) + 1
 	)
 
-	renderTitle(left, top, g.arena)
+	renderTitle(p, left, top, g.arena, stat)
 	renderArena(g.arena, top, bottom, left)
 	renderSnake(left, bottom, g.arena.snake)
 	renderFood(left, bottom, g.arena.food)
@@ -70,14 +75,17 @@ func renderQuitMessage(right, bottom int) {
 	tbprint(right-17, bottom+1, defaultColor, defaultColor, m)
 }
 
-func renderTitle(left, top int, a *arena) {
-	msg := fmt.Sprintf(
-		"Snake Game head(%d,%d) food(%d,%d)",
-		a.snake.head().x,
-		a.snake.head().y,
-		a.food.x,
-		a.food.y,
-	)
+func renderTitle(p state.Parameters, left, top int, a *arena, s state.Stat) {
+	msg := "Snake Game in human mode"
+	if !p.Human {
+		msg = fmt.Sprintf(
+			"Snake Game MaxScore: %d, epoch: %d, epochMaxScore: %d, inst: %d",
+			s.BestScore,
+			s.Epoch,
+			s.MaxEpochScore,
+			s.Instance,
+		)
+	}
 	tbprint(left, top-1, defaultColor, defaultColor, msg)
 }
 

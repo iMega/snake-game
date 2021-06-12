@@ -1,0 +1,20 @@
+run:
+  deadline: 5m
+  issues-exit-code: 1
+  tests: false
+  skip-dirs:
+    - tests
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+linters:
+  enable-all: true
+  disable:
+    - exhaustivestruct

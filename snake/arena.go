@@ -41,9 +41,12 @@ func (a *arena) moveSnake() error {
 
 	if a.hasFood(a, a.snake.head()) {
 		go a.addPoints(a.food.points)
+		a.snake.steps = 0
 		a.snake.length++
 		a.placeFood()
 	}
+
+	a.snake.steps++
 
 	return nil
 }
