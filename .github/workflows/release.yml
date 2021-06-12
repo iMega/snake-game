@@ -8,6 +8,11 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -28,6 +33,6 @@ jobs:
         uses: wangyoucao577/go-release-action@v1.14
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: linux
+          goos: ${{ matrix.goos }}
           goarch: amd64
           ldflags: -s -w
